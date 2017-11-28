@@ -41,6 +41,7 @@ void getTemperatura(){
   if(millis()-oldMilis>1000){
     temperatura = thermocouple.readCelsius();
     oldMilis = millis();
+    oldTemp = temperatura;
     //temperatura = random(temperatura-20,temperatura+50);
   }
 }
@@ -66,6 +67,12 @@ void setup(){
 }
   
 void loop(){
+  Serial.print("OLD TEMP = ");
+  Serial.println(oldTemp);
+  Serial.print("ACTUAL TEMP = ");
+  Serial.println(temperatura);
+  Serial.println(oldTemp +0.5 <= temperatura );
+  Serial.println("-----------------------------------------------------------");
   
   pinMode(vccPin, OUTPUT); digitalWrite(vccPin, HIGH);
   pinMode(gndPin, OUTPUT); digitalWrite(gndPin, LOW);
@@ -108,22 +115,18 @@ void loop(){
     }
     
   }
-   if(setPoint>10){
-      getTemperatura();
-      
-   }
-   if(temperatura<setPoint && setPoint>10 && estado2 ){
+   if(temperatura<setPoint-7 && setPoint>10 && estado2 ){
       digitalWrite(rele,HIGH);    
       Serial.println("ENCENDIDO!! ");
       Serial.print("temperatura: ");
-      lcd.setCursor(6,1);
-      lcd.print("                               ");
-      if(oldTemp != temperatura){
+      if(oldTemp +0.3 <= temperatura || oldTemp -0.5 >= temperatura){
+          lcd.setCursor(6,1);
+          lcd.print("                               ");
           lcd.setCursor(0,1);
           Serial.println("T = ");
           lcd.setCursor(0, 1);
           lcd.print("T = ");
-          lcd.setCursor(4, 1);
+          lcd.setCursor(7, 1);
           lcd.print("                ");
           lcd.setCursor(4, 1);
           lcd.print(temperatura);
@@ -139,23 +142,25 @@ void loop(){
    }else if (temperatura >= setPoint && setPoint>10){
       digitalWrite(rele,LOW);
       Serial.print("temperatura: ");
-      lcd.setCursor(0,1);
-      lcd.print("                               ");
-      lcd.setCursor(0,1);
-      
-      Serial.println(temperatura);
-      lcd.setCursor(0, 1);
-      lcd.print("T = ");
-      lcd.setCursor(4, 1);
-      lcd.print("                ");
-      lcd.setCursor(4, 1);
-      lcd.print(temperatura);
-      lcd.setCursor(9, 1);
-      lcd.print(" E=");
-      lcd.setCursor(13,1);
-      lcd.print("OFF");
-      lcd.setCursor(0,0);
-      primerSetPoint = true;
+      if(millis()-oldMilis>1000 && oldTemp != temperatura){
+        lcd.setCursor(0,1);
+        lcd.print("                               ");
+        lcd.setCursor(0,1);
+        
+        Serial.println(temperatura);
+        lcd.setCursor(0, 1);
+        lcd.print("T = ");
+        lcd.setCursor(4, 1);
+        lcd.print("                ");
+        lcd.setCursor(4, 1);
+        lcd.print(temperatura);
+        lcd.setCursor(9, 1);
+        lcd.print(" E=");
+        lcd.setCursor(13,1);
+        lcd.print("OFF");
+        lcd.setCursor(0,0);
+        primerSetPoint = true;
+      }
   }
       if(tiempo>0){
         if(tiempo!=tiempoAnterior){
@@ -324,6 +329,12 @@ void loop(){
    }
  
     //Serial.println(setPoint);
+
+  
+   if(setPoint>10){
+      getTemperatura();
+      
+   }
 } 
 
 
